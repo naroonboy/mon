@@ -1,0 +1,51 @@
+from flask import Flask, render_template
+import requests
+
+app = Flask(__name__)
+
+# Host: [Ports] mapping
+HOSTS_WITH_PORTS = {
+    "host1.example.com": [8443, 8444, 8445],
+    "host2.example.com": [8443, 8444, 8445],
+    "host3.example.com": [8443, 8444, 8445],
+    "host4.example.com": [33333]
+}
+
+@app.route("/")
+def index():
+    data = []
+    for hostname, ports in HOSTS_WITH_PORTS.items():
+        for port in ports:
+            url = f"https://{hostname}:{port}/adcs-health"
+            try:
+                response = requests.get(url, verify=False, timeout=5)
+                if response.ok:
+                    health = response.json()
+                    data.append({
+                        "hostname": hostname,
+                        "port": port,
+                        "status": health.get("status", "unknown"),
+                        "upsince": health.get("upsince", "unknown"),
+                        "uptime": health.get("uptime", "unknown")
+                    })
+                else:
+                    data.append({
+                        "hostname": hostname,
+                        "port": port,
+                        "status": "error",
+                        "upsince": "-",
+                        "uptime": "-"
+                    })
+            except Exception as e:
+                data.append({
+                    "hostname": hostname,
+                    "port": port,
+                    "status": "unreachable",
+                    "upsince": "-",
+                    "uptime": "-"
+                })
+
+    return render_template("index.html", data=data)
+
+if __name__ == "__main__":
+    app.run(debug=True)
