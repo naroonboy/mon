@@ -1,0 +1,6 @@
+import shutil
+
+# Create a zip file from a directory
+source_directory = 'my_python_app'  # Replace with your app's directory
+output_zip = 'my_python_app'        # Base name for the output zip file (without .zip)
+shutil.make_archive(output_zip, 'zip', source_directory)
