@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ADCS Health Monitor</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { padding: 8px 12px; border: 1px solid #ccc; text-align: left; }
+        th { background-color: #f4f4f4; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .status-healthy { color: green; }
+        .status-error { color: red; }
+        .status-unreachable { 
+            color: red;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        #loading { display: block; text-align: center; margin: 20px; }
+    </style>
+</head>
+<body>
+    <h1>ADCS Health Monitor</h1>
+    <div id="loading">Loading...</div>
+    <table id="health-table" style="display: none;">
+        <thead>
+            <tr>
+                <th>Hostname</th>
+                <th>Port</th>
+                <th>Status</th>
+                <th>Up Since</th>
+                <th>Uptime</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td>{{ item.hostname }}</td>
+                <td>{{ item.port }}</td>
+                <td class="status-{{ item.status|lower }}">{{ item.status }}</td>
+                <td>{{ item.upsince }}</td>
+                <td>{{ item.uptime }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        window.onload = function() {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("health-table").style.display = "table";
+        };
+    </script>
+</body>
+</html>
