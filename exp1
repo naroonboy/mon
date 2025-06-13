@@ -1,0 +1,49 @@
+import requests
+import pdfkit
+import os
+
+# Configuration
+API_TOKEN = "your-api-token-here"  # Replace with your Splunk Observability Cloud API token
+DASHBOARD_URL = "https://your-org.splunkcloud.com/en-US/app/observability/dashboards/your-dashboard-id"  # Replace with your dashboard URL
+OUTPUT_PATH = "dashboard.pdf"  # Local path to save the PDF
+WKHTMLTOPDF_PATH = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"  # Update with your wkhtmltopdf path (Windows example)
+
+# Optional: If the dashboard requires authentication, use the API to fetch data
+def get_dashboard_data(dashboard_id):
+    api_url = f"https://api.signalfx.com/v2/dashboard/{dashboard_id}"
+    headers = {
+        "Content-Type": "application/json",
+        "X-SF-TOKEN": API_TOKEN
+    }
+    try:
+        response = requests.get(api_url, headers=headers)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching dashboard data: {e}")
+        return None
+
+# Function to convert dashboard to PDF
+def export_dashboard_to_pdf(url, output_path):
+    try:
+        # Configure pdfkit with wkhtmltopdf path
+        config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
+        # Configure pdfkit options (adjust as needed)
+        options = {
+            'page-size': 'A4',
+            'enable-local-file-access': '',  # Allow local file access if needed
+            'cookie': [('sf_sess', API_TOKEN)],  # Pass session token if required
+            'no-stop-slow-scripts': '',  # Allow slow scripts to run
+            'enable-javascript': '',  # Enable JavaScript for dynamic content
+            'javascript-delay': '5000'  # Wait for JavaScript to render (adjust as needed)
+        }
+        # Convert the dashboard URL to PDF
+        pdfkit.from_url(url, output_path, options=options, configuration=config)
+        print(f"PDF saved successfully to {output_path}")
+    except Exception as e:
+        print(f"Error generating PDF: {e}")
+
+# Main execution
+if __name__ == "__main__":
+    # Export the dashboard URL to PDF
+    export_dashboard_to_pdf(DASHBOARD_URL, OUTPUT_PATH)
